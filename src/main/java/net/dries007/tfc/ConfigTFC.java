@@ -82,6 +82,14 @@ public class ConfigTFC
         @Config.LangKey("config." + MOD_ID + ".general.woodenBucketWhitelist")
         public String[] woodenBucketWhitelist = new String[] {"fresh_water", "hot_water", "salt_water", "water", "limewater", "tannin", "olive_oil", "vinegar", "rum", "beer", "whiskey", "rye_whiskey", "corn_whiskey", "sake", "vodka", "cider", "brine", "milk", "milk_curdled", "milk_vinegar"};
 
+        @Config.Comment("List of fluids allowed to be picked up by blue steel bucket")
+        @Config.LangKey("config." + MOD_ID + ".general.blueSteelBucketWhitelist")
+        public String[] blueSteelBucketWhitelist = new String[] {"lava"};
+
+        @Config.Comment("List of fluids allowed to be picked up by red steel bucket")
+        @Config.LangKey("config." + MOD_ID + ".general.redSteelBucketWhitelist")
+        public String[] redSteelBucketWhitelist = new String[] {"fresh_water", "hot_water", "salt_water", "water"};
+
         @Config.Comment("Modifier for how quickly items gains and loses heat. Smaller number = slower temperature changes.")
         @Config.RangeDouble(min = 0, max = 10)
         @Config.LangKey("config." + MOD_ID + ".general.temperatureModifierGlobal")
@@ -268,6 +276,14 @@ public class ConfigTFC
         @Config.LangKey("config." + MOD_ID + ".general.foodDecayStackTime")
         public int foodDecayStackTime = 6;
 
+        @Config.Comment("If true, hammer must be in offhand for chisel use. If false, hammer can be in offhand or toolbar.")
+        @Config.LangKey("config." + MOD_ID + ".general.requireHammerInOffHand")
+        public boolean requireHammerInOffHand = true;
+
+        @Config.Comment("Does the chisel have a delay on use?")
+        @Config.LangKey("config." + MOD_ID + ".general.chiselDelay")
+        public boolean chiselDelay = false;
+
         @Config.Comment("Add iron ore dictionary to wrought iron items?")
         @Config.LangKey("config." + MOD_ID + ".general.oreDictIron")
         public boolean oreDictIron = false;
@@ -287,6 +303,10 @@ public class ConfigTFC
         @Config.Comment("The time required for a charcoal pit to complete")
         @Config.LangKey("config." + MOD_ID + ".general.charcoalPitTime")
         public int charcoalPitTime = 18_000;
+
+        @Config.Comment("The default length of a month (in days) when a new world is started. This can be changed in existing worlds via the /timetfc command.")
+        @Config.LangKey("config." + MOD_ID + ".general.defaultMonthLength")
+        public int defaultMonthLength = 8;
     }
 
     public static class ClientCFG
