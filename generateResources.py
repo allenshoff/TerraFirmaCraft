@@ -1107,6 +1107,7 @@ item(('ceramics', 'fired', 'bowl'), 'tfc:items/ceramics/fired/bowl')
 item(('ceramics', 'unfired', 'fire_brick'), 'tfc:items/ceramics/unfired/fire_brick')
 item(('ceramics', 'fired', 'fire_brick'), 'tfc:items/ceramics/fired/fire_brick')
 item(('ceramics', 'unfired', 'jug'), 'tfc:items/ceramics/unfired/jug')
+item(('ceramics', 'unfired', 'lamp'), 'tfc:items/ceramics/unfired/lamp')
 
 item(('ceramics', 'fire_clay'), 'tfc:items/ceramics/fire_clay')
 
