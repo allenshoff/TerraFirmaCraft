@@ -105,6 +105,7 @@ public final class BlocksTFC
     private static ImmutableList<BlockPlantTFC> allPlantBlocks;
     private static ImmutableList<BlockPlantTFC> allGrassBlocks;
     private static ImmutableList<BlockLoom> allLoomBlocks;
+    private static ImmutableList<BlockTable> allTableBlocks;
     private static ImmutableList<BlockSupport> allSupportBlocks;
 
     private static ImmutableList<BlockFruitTreeSapling> allFruitTreeSaplingBlocks;
@@ -371,6 +372,9 @@ public final class BlocksTFC
             // All bookshelves + item blocks
             for (Tree wood : TFCRegistries.TREES.getValuesCollection())
                 normalItemBlocks.add(new ItemBlockTFC(register(r, "wood/bookshelf/" + wood.getRegistryName().getPath(), new BlockBookshelfTFC(wood), CT_DECORATIONS)));
+            //All tables + item blocks
+            for (Tree wood : TFCRegistries.TREES.getValuesCollection())
+                normalItemBlocks.add(new ItemBlockTFC(register(r, "wood/simple_table/" + wood.getRegistryName().getPath(), new BlockTable(wood), CT_DECORATIONS)));
             // All workbenches + item blocks
             for (Tree wood : TFCRegistries.TREES.getValuesCollection())
                 normalItemBlocks.add(new ItemBlockTFC(register(r, "wood/workbench/" + wood.getRegistryName().getPath(), new BlockWorkbenchTFC(wood), CT_DECORATIONS)));
@@ -397,7 +401,6 @@ public final class BlocksTFC
 
                 toolRacks.add(register(r, "wood/tool_rack/" + wood.getRegistryName().getPath(), new BlockToolRack(wood), CT_DECORATIONS));
                 barrelItems.add(new ItemBlockBarrel(register(r, "wood/barrel/" + wood.getRegistryName().getPath(), new BlockBarrel(), CT_DECORATIONS)));
-
                 looms.add(register(r, "wood/loom/" + wood.getRegistryName().getPath(), new BlockLoom(wood), CT_WOOD));
                 supports.add(register(r, "wood/support/" + wood.getRegistryName().getPath(), new BlockSupport(wood), CT_WOOD));
             }

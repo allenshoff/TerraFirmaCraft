@@ -961,6 +961,12 @@ for wood_type in WOOD_TYPES:
         }
     })
 
+    # TABLE
+    blockstate(('wood', 'simple_table', wood_type), 'tfc:simple_table', textures={
+        'all': 'tfc:blocks/wood/planks/%s' % wood_type,
+        'particle': 'tfc:blocks/wood/planks/%s' % wood_type,
+    })
+
     # SUPPORT
     blockstate(('wood', 'support', wood_type), 'tfc:support/vertical', textures={
         'texture': 'tfc:blocks/wood/sheets/%s' % wood_type,
