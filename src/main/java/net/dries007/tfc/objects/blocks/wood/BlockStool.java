@@ -16,32 +16,37 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.dries007.tfc.api.capability.size.IItemSize;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
 import net.dries007.tfc.api.types.Tree;
+import net.dries007.tfc.util.Helpers;
 
 import static net.minecraft.block.material.Material.WOOD;
 
 @ParametersAreNonnullByDefault
-public class BlockTable extends Block implements IItemSize
+public class BlockStool extends Block implements IItemSize
 {
-    protected static final AxisAlignedBB TABLE_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+    protected static final AxisAlignedBB STOOL_AABB = new AxisAlignedBB(0.1875D, 0.0D, 0.1875D, 0.8125D, 0.5D, 0.8125D);
 
-    private static final Map<Tree, BlockTable> MAP = new HashMap<>();
+    private static final Map<Tree, BlockStool> MAP = new HashMap<>();
 
-    public static BlockTable get(Tree wood)
+    public static BlockStool get(Tree wood)
     {
         return MAP.get(wood);
     }
 
     public Tree wood;
 
-    public BlockTable(Tree wood)
+    public BlockStool(Tree wood)
     {
         super(WOOD, MapColor.AIR);
         if (MAP.put(wood, this) != null) throw new IllegalStateException("There can only be one.");
@@ -65,9 +70,16 @@ public class BlockTable extends Block implements IItemSize
     @Nonnull
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        return TABLE_AABB;
+        return STOOL_AABB;
     }
-    
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    {
+        Helpers.sitOnBlock(worldIn, pos, playerIn, 0.3D);
+        return true;
+    }
+
     @Override
     @SuppressWarnings("deprecation")
     public boolean isOpaqueCube(IBlockState state)
@@ -87,13 +99,13 @@ public class BlockTable extends Block implements IItemSize
     @Override
     public Size getSize(ItemStack stack)
     {
-        return Size.LARGE;
+        return Size.NORMAL;
     }
 
     @Nonnull
     @Override
     public Weight getWeight(ItemStack stack)
     {
-        return Weight.HEAVY;
+        return Weight.MEDIUM;
     }
 }

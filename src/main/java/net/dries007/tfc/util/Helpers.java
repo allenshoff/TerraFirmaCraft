@@ -63,6 +63,24 @@ public final class Helpers
     }
 
     /**
+     * Makes a player entity sit on a block
+     *
+     * @param world    the worldObj
+     * @param pos      the BlockPos of the block to sit on
+     * @param player   the EntityPlayer that will sit on this block
+     * @param yOffset  the y offset of the top facing
+     */
+    public static void sitOnBlock(World world, BlockPos pos, EntityPlayer player, double yOffset)
+    {
+        if (!world.isRemote && !world.getBlockState(pos).getMaterial().isReplaceable())
+        {
+            EntitySeatOn seat = new EntitySeatOn(world, pos, yOffset);
+            world.spawnEntity(seat);
+            player.startRiding(seat);
+        }
+    }
+
+    /**
      * Returns the entity which is sitting on this BlockPos.
      *
      * @param world the WorldObj

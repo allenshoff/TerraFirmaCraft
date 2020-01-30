@@ -18,8 +18,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
@@ -32,6 +35,10 @@ import net.dries007.tfc.api.capability.size.IItemSize;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
 import net.dries007.tfc.api.types.Tree;
+import net.dries007.tfc.client.TFCSounds;
+import net.dries007.tfc.objects.blocks.BlocksTFC;
+import net.dries007.tfc.objects.items.ItemsTFC;
+import net.dries007.tfc.objects.items.wood.ItemSplitLogTFC;
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.OreDictionaryHelper;
 
@@ -126,6 +133,49 @@ public class BlockLogTFC extends BlockLog implements IItemSize
     }
 
     @Override
+    public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
+    {   
+        //can only place small logs on full logs
+        if(!worldIn.getBlockState(pos).getValue(SMALL))
+        {
+            //since shift+right click and right click are both taken, left click + sneak to avoid additional keybindings or conflicts
+            final ItemStack stack = playerIn.getHeldItemMainhand();
+            if(playerIn.isSneaking() && OreDictionaryHelper.doesStackMatchOre(stack, "logWood"))
+            {
+                if(worldIn.getBlockState(pos.up()).getBlock().equals(Blocks.AIR))
+                {
+                    if(stack.getItem() instanceof ItemBlock);
+                    {
+                        ItemBlock ib = (ItemBlock)(stack.getItem());
+
+                        worldIn.setBlockState(pos.up(), ib.getBlock().getDefaultState().withProperty(SMALL, true), worldIn.isRemote ? 11 : 3);
+                        stack.splitStack(1);
+                    }
+                }        
+            }
+        }
+    }
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
+            EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+    {
+        //logic for handling small block splitting
+        if(worldIn.getBlockState(pos).getValue(SMALL))
+        {
+            final ItemStack stack = playerIn.getHeldItemMainhand();
+            final Set<String> toolClasses = stack.getItem().getToolClasses(stack);
+            if (toolClasses.contains("axe") && !toolClasses.contains("saw"))
+            {
+                Helpers.spawnItemStack(worldIn, pos.add(0.5d, 0.5d, 0.5d), new ItemStack(ItemSplitLogTFC.get(this.wood), 4));
+                worldIn.playSound(playerIn, pos, TFCSounds.LOG_SPLIT, SoundCategory.BLOCKS, 1.0F, 1.0F);   
+                return worldIn.setBlockState(pos, Blocks.AIR.getDefaultState(), worldIn.isRemote ? 11 : 3);
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void updateTick(World world, BlockPos pos, IBlockState state, Random rand)
     {
         // For floating tree things, just make them gently disappear over time
@@ -176,13 +226,13 @@ public class BlockLogTFC extends BlockLog implements IItemSize
     @Override
     public IBlockState getStateFromMeta(int meta)
     {
-        return getDefaultState().withProperty(LOG_AXIS, EnumAxis.values()[meta & 0b11]).withProperty(PLACED, (meta & 0b100) == 0b100).withProperty(SMALL, (meta & 0b1000) == 0b1000);
+        return getDefaultState().withProperty(LOG_AXIS, EnumAxis.values()[meta & 0b11]).withProperty(PLACED, (meta & 0b100) == 0b100).withProperty(SMALL, (meta & 0b100) == 0b100);
     }
 
     @Override
     public int getMetaFromState(IBlockState state)
     {
-        return state.getValue(LOG_AXIS).ordinal() | (state.getValue(PLACED) ? 0b100 : 0) | (state.getValue(SMALL) ? 0b1000 : 0);
+        return state.getValue(LOG_AXIS).ordinal() | (state.getValue(PLACED) ? 0b100 : 0) | (state.getValue(SMALL) ? 0b100 : 0);
     }
 
     @Override
@@ -202,12 +252,12 @@ public class BlockLogTFC extends BlockLog implements IItemSize
         // Don't do vanilla leaf decay
     }
 
-    @Override
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
-    {
-        // Small logs are a weird feature, for now they shall be disabled via shift placement since it interferes with log pile placement
-        return super.getStateForPlacement(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer).withProperty(PLACED, true);
-    }
+    // @Override
+    // public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    // {
+    //     // Small logs are a weird feature, for now they shall be disabled via shift placement since it interferes with log pile placement
+    //     return super.getStateForPlacement(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer).withProperty(PLACED, true);
+    // }
 
     @Override
     public Size getSize(ItemStack stack)

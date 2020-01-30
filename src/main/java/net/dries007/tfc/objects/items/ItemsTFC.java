@@ -47,6 +47,7 @@ import net.dries007.tfc.objects.items.rock.ItemRockToolHead;
 import net.dries007.tfc.objects.items.wood.ItemBoatTFC;
 import net.dries007.tfc.objects.items.wood.ItemDoorTFC;
 import net.dries007.tfc.objects.items.wood.ItemLumberTFC;
+import net.dries007.tfc.objects.items.wood.ItemSplitLogTFC;
 import net.dries007.tfc.objects.items.wood.ItemWoodenBucket;
 import net.dries007.tfc.util.OreDictionaryHelper;
 import net.dries007.tfc.util.agriculture.Crop;
@@ -100,6 +101,10 @@ public final class ItemsTFC
     public static final ItemPottery UNFIRED_JUG = getNull();
     @GameRegistry.ObjectHolder("ceramics/fired/jug")
     public static final ItemPottery FIRED_JUG = getNull();
+    @GameRegistry.ObjectHolder("ceramics/unfired/lamp")
+    public static final ItemPottery UNFIRED_LAMP = getNull();
+    @GameRegistry.ObjectHolder("ceramics/fired/lamp")
+    public static final ItemPottery FIRED_LAMP = getNull();
     @GameRegistry.ObjectHolder("ceramics/unfired/pot")
     public static final ItemPottery UNFIRED_POT = getNull();
     @GameRegistry.ObjectHolder("ceramics/fired/pot")
@@ -219,6 +224,7 @@ public final class ItemsTFC
         for (Tree wood : TFCRegistries.TREES.getValuesCollection())
         {
             simpleItems.add(register(r, "wood/lumber/" + wood.getRegistryName().getPath(), new ItemLumberTFC(wood), CT_WOOD));
+            simpleItems.add(register(r, "wood/split_log/" + wood.getRegistryName().getPath(), new ItemSplitLogTFC(wood), CT_WOOD));
             simpleItems.add(register(r, "wood/boat/" + wood.getRegistryName().getPath(), new ItemBoatTFC(wood), CT_WOOD));
         }
 
@@ -260,6 +266,9 @@ public final class ItemsTFC
 
             simpleItems.add(register(r, "ceramics/unfired/jug", new ItemPottery(), CT_POTTERY));
             register(r, "ceramics/fired/jug", new ItemJug(), CT_POTTERY);
+            
+            simpleItems.add(register(r, "ceramics/unfired/lamp", new ItemPottery(), CT_POTTERY));
+            register(r, "ceramics/fired/lamp", new ItemLamp(), CT_POTTERY);
 
         }
 

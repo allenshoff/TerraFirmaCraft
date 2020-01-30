@@ -38,6 +38,9 @@ public class TFCSounds
     @GameRegistry.ObjectHolder(MOD_ID + ":item.jug.blow")
     public static final SoundEvent JUG_BLOW = getNull();
 
+    @GameRegistry.ObjectHolder(MOD_ID + ":wood.log.split")
+    public static final SoundEvent LOG_SPLIT = getNull();
+
     @GameRegistry.ObjectHolder(MOD_ID + ":animal.bear.say")
     public static final SoundEvent ANIMAL_BEAR_SAY = getNull();
     @GameRegistry.ObjectHolder(MOD_ID + ":animal.bear.cry")
@@ -85,6 +88,7 @@ public class TFCSounds
             CHARCOAL_PILE_HIT,
             CHARCOAL_PILE_PLACE,
             CHARCOAL_PILE_STEP,
+            
             // Misc
             createSoundEvent("rock.slide.long"),
             createSoundEvent("rock.slide.short"),
@@ -95,6 +99,7 @@ public class TFCSounds
             createSoundEvent("anvil.metalimpact"),
             createSoundEvent("item.throw"),
             createSoundEvent("item.jug.blow"),
+            createSoundEvent("wood.log.split"),
             // Animals
             createSoundEvent("animal.bear.cry"),
             createSoundEvent("animal.bear.say"),

@@ -805,7 +805,9 @@ for wood_type in WOOD_TYPES:
             }
         },
         'small': {
-            'true': {'model': 'tfc:small_log'},
+            'true': {'model': 'tfc:small_log',
+            'textures': {'end': 'tfc:blocks/wood/top/%s' % wood_type,
+                         'side': 'tfc:blocks/wood/log/%s' % wood_type}},
             'false': {},
         }
     })
@@ -967,6 +969,12 @@ for wood_type in WOOD_TYPES:
         'particle': 'tfc:blocks/wood/planks/%s' % wood_type,
     })
 
+    # STOOL
+    blockstate(('wood', 'simple_stool', wood_type), 'tfc:simple_stool', textures={
+        'all': 'tfc:blocks/wood/planks/%s' % wood_type,
+        'particle': 'tfc:blocks/wood/planks/%s' % wood_type,
+    })
+
     # SUPPORT
     blockstate(('wood', 'support', wood_type), 'tfc:support/vertical', textures={
         'texture': 'tfc:blocks/wood/sheets/%s' % wood_type,
@@ -1044,6 +1052,7 @@ item(('metal', 'ingot', 'unknown'), 'tfc:items/metal/ingot/%s' % 'unknown')
 # WOOD STUFF
 for wood_type in WOOD_TYPES:
     item(('wood', 'lumber', wood_type), 'tfc:items/wood/lumber/%s' % wood_type)
+    item(('wood', 'split_log', wood_type), 'tfc:items/wood/split_log/%s' % wood_type)
     item(('wood', 'boat', wood_type), 'tfc:items/wood/boat/%s' % wood_type)
 
 # ROCK TOOLS

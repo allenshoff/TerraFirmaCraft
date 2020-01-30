@@ -372,9 +372,6 @@ public final class BlocksTFC
             // All bookshelves + item blocks
             for (Tree wood : TFCRegistries.TREES.getValuesCollection())
                 normalItemBlocks.add(new ItemBlockTFC(register(r, "wood/bookshelf/" + wood.getRegistryName().getPath(), new BlockBookshelfTFC(wood), CT_DECORATIONS)));
-            //All tables + item blocks
-            for (Tree wood : TFCRegistries.TREES.getValuesCollection())
-                normalItemBlocks.add(new ItemBlockTFC(register(r, "wood/simple_table/" + wood.getRegistryName().getPath(), new BlockTable(wood), CT_DECORATIONS)));
             // All workbenches + item blocks
             for (Tree wood : TFCRegistries.TREES.getValuesCollection())
                 normalItemBlocks.add(new ItemBlockTFC(register(r, "wood/workbench/" + wood.getRegistryName().getPath(), new BlockWorkbenchTFC(wood), CT_DECORATIONS)));
@@ -384,7 +381,17 @@ public final class BlocksTFC
             // All buttons + item blocks
             for (Tree wood : TFCRegistries.TREES.getValuesCollection())
                 inventoryItemBlocks.add(new ItemBlockTFC(register(r, "wood/button/" + wood.getRegistryName().getPath(), new BlockButtonWoodTFC(wood), CT_DECORATIONS)));
-            // Other blocks that don't have specific order requirements
+
+            //FURNITURE
+            //All tables + item blocks
+            for (Tree wood : TFCRegistries.TREES.getValuesCollection())
+            normalItemBlocks.add(new ItemBlockTFC(register(r, "wood/simple_table/" + wood.getRegistryName().getPath(), new BlockTable(wood), CT_DECORATIONS)));
+            //All stools + item blocks
+            for (Tree wood : TFCRegistries.TREES.getValuesCollection())
+            normalItemBlocks.add(new ItemBlockTFC(register(r, "wood/simple_stool/" + wood.getRegistryName().getPath(), new BlockStool(wood), CT_DECORATIONS)));
+        
+
+                // Other blocks that don't have specific order requirements
             for (Tree wood : TFCRegistries.TREES.getValuesCollection())
             {
                 // Only block in the decorations category
