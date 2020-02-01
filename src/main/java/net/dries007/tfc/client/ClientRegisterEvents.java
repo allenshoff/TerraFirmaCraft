@@ -68,8 +68,9 @@ import net.dries007.tfc.objects.items.metal.ItemOreTFC;
 import net.dries007.tfc.objects.te.*;
 import net.dries007.tfc.util.climate.ClimateTFC;
 
-import static net.dries007.tfc.api.util.TFCConstants.MOD_ID;
+import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 import static net.dries007.tfc.objects.blocks.BlockPlacedHide.SIZE;
+import static net.dries007.tfc.objects.blocks.agriculture.BlockCropDead.MATURE;
 import static net.dries007.tfc.objects.blocks.agriculture.BlockCropTFC.WILD;
 
 @SideOnly(Side.CLIENT)
@@ -205,6 +206,9 @@ public final class ClientRegisterEvents
 
         for (Block block : BlocksTFC.getAllCropBlocks())
             ModelLoader.setCustomStateMapper(block, new StateMap.Builder().ignore(WILD).build());
+
+        for (Block block : BlocksTFC.getAllDeadCropBlocks())
+            ModelLoader.setCustomStateMapper(block, new StateMap.Builder().ignore(MATURE).build());
 
         for (Block block : BlocksTFC.getAllFruitTreeLeavesBlocks())
             ModelLoader.setCustomStateMapper(block, new StateMap.Builder().ignore(BlockFruitTreeLeaves.DECAYABLE).ignore(BlockFruitTreeLeaves.HARVESTABLE).build());

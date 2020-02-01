@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    " X ",
+	"XSX"
+  ],
+  "key": {
+    "X": {
+      "item": "tfc:wood/lumber/chestnut"
+    },
+    "S": {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    }
+  },
+
+  "result": {
+    "item": "tfc:wood/simple_stool/chestnut",
+    "count": 1
+  }
+}

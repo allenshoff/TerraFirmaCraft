@@ -31,18 +31,26 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import io.netty.buffer.ByteBuf;
 import net.dries007.tfc.Constants;
-import net.dries007.tfc.api.util.TFCConstants;
+import net.dries007.tfc.TerraFirmaCraft;
 import net.dries007.tfc.objects.entity.EntitySeatOn;
 
 public final class Helpers
 {
     private static final Joiner JOINER_DOT = Joiner.on('.');
+
+    private static final boolean JEI = Loader.isModLoaded("jei");
+
+    public static boolean isJEIEnabled()
+    {
+        return JEI;
+    }
 
     /**
      * Makes an entity sit on a block
@@ -139,13 +147,13 @@ public final class Helpers
 
     public static String getEnumName(Enum<?> anEnum)
     {
-        return JOINER_DOT.join(TFCConstants.MOD_ID, "enum", anEnum.getDeclaringClass().getSimpleName(), anEnum).toLowerCase();
+        return JOINER_DOT.join(TerraFirmaCraft.MOD_ID, "enum", anEnum.getDeclaringClass().getSimpleName(), anEnum).toLowerCase();
     }
 
     public static String getTypeName(IForgeRegistryEntry<?> type)
     {
         //noinspection ConstantConditions
-        return JOINER_DOT.join(TFCConstants.MOD_ID, "types", type.getRegistryType().getSimpleName(), type.getRegistryName().getPath()).toLowerCase();
+        return JOINER_DOT.join(TerraFirmaCraft.MOD_ID, "types", type.getRegistryType().getSimpleName(), type.getRegistryName().getPath()).toLowerCase();
     }
 
     public static boolean playerHasItemMatchingOre(InventoryPlayer playerInv, String ore)

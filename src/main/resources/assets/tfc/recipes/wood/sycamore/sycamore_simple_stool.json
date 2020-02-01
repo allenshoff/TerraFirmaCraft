@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    " X ",
+	"XSX"
+  ],
+  "key": {
+    "X": {
+      "item": "tfc:wood/lumber/sycamore"
+    },
+    "S": {
+      "type": "forge:ore_dict",
+      "ore": "stickWood"
+    }
+  },
+
+  "result": {
+    "item": "tfc:wood/simple_stool/sycamore",
+    "count": 1
+  }
+}

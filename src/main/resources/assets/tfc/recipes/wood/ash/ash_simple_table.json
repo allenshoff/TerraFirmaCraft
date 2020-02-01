@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "XXX",
+	"X X"
+  ],
+  "key": {
+    "X": {
+      "item": "tfc:wood/lumber/ash"
+    }
+  },
+  "result": {
+    "item": "tfc:wood/simple_table/ash",
+    "count": 1
+  }
+}

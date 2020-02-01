@@ -17,8 +17,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.dries007.tfc.api.recipes.knapping.KnappingType;
 import net.dries007.tfc.client.button.GuiButtonKnapping;
 import net.dries007.tfc.objects.container.ContainerKnapping;
+import net.dries007.tfc.util.Helpers;
 
-import static net.dries007.tfc.api.util.TFCConstants.MOD_ID;
+import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 
 public class GuiKnapping extends GuiContainerTFC
 {
@@ -49,6 +50,11 @@ public class GuiKnapping extends GuiContainerTFC
                 int by = (height - ySize) / 2 + 12 + 16 * y;
                 addButton(new GuiButtonKnapping(x + 5 * y, bx, by, 16, 16, buttonTexture));
             }
+        }
+        // JEI reloads this after it's recipe gui is closed
+        if (inventorySlots instanceof ContainerKnapping)
+        {
+            ((ContainerKnapping) inventorySlots).requiresReset = true;
         }
     }
 
@@ -87,12 +93,16 @@ public class GuiKnapping extends GuiContainerTFC
             {
                 if (button instanceof GuiButtonKnapping)
                 {
-                    button.visible = false;
+                    button.visible = ((ContainerKnapping) inventorySlots).getSlotState(button.id);
                 }
             }
             ((ContainerKnapping) inventorySlots).requiresReset = false;
         }
         super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
+        if (Helpers.isJEIEnabled())
+        {
+            drawTexturedModalRect(guiLeft + 132, guiTop + 27, 176, 0, 9, 14);
+        }
         if (type == KnappingType.CLAY || type == KnappingType.FIRE_CLAY)
         {
             GlStateManager.color(1, 1, 1, 1);
@@ -114,6 +124,11 @@ public class GuiKnapping extends GuiContainerTFC
         {
             ((GuiButtonKnapping) button).onClick();
             button.playPressSound(mc.getSoundHandler());
+            // Set the client-side matrix
+            if (inventorySlots instanceof ContainerKnapping)
+            {
+                ((ContainerKnapping) inventorySlots).setSlotState(button.id, false);
+            }
         }
     }
 }

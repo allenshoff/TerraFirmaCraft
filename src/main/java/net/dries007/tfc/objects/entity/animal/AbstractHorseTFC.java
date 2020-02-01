@@ -5,7 +5,11 @@
 
 package net.dries007.tfc.objects.entity.animal;
 
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Optional;
@@ -55,9 +59,9 @@ import net.dries007.tfc.Constants;
 import net.dries007.tfc.client.TFCGuiHandler;
 import net.dries007.tfc.objects.LootTablesTFC;
 import net.dries007.tfc.objects.entity.ai.EntityAIRunAroundLikeCrazyTFC;
-import net.dries007.tfc.util.calendar.CalendarTFC;
 
-public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryChangedListener, IJumpingMount, IAnimalTFC
+@SuppressWarnings("WeakerAccess")
+public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryChangedListener, IJumpingMount
 {
     protected static final IAttribute JUMP_STRENGTH = (new RangedAttribute(null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).setDescription("Jump Strength").setShouldWatch(true);
     private static final int DAYS_TO_ADULTHOOD = 1120;
@@ -77,12 +81,6 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
     {
         EntityLiving.registerFixesMob(fixer, entityClass);
         fixer.registerWalker(FixTypes.ENTITY, new ItemStackData(entityClass, "SaddleItem"));
-    }
-
-    private static int getRandomGrowth()
-    {
-        int lifeTimeDays = Constants.RNG.nextInt(DAYS_TO_ADULTHOOD * 4);
-        return (int) (CalendarTFC.PLAYER_TIME.getTotalDays() - lifeTimeDays);
     }
 
     public int tailCounter;
@@ -109,7 +107,7 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
     @SuppressWarnings("unused")
     public AbstractHorseTFC(World worldIn)
     {
-        this(worldIn, Gender.fromBool(Constants.RNG.nextBoolean()), getRandomGrowth());
+        this(worldIn, Gender.valueOf(Constants.RNG.nextBoolean()), getRandomGrowth(DAYS_TO_ADULTHOOD));
     }
 
     public AbstractHorseTFC(World worldIn, Gender gender, int birthDay)
@@ -121,9 +119,27 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
     }
 
     @Override
-    public boolean isValidSpawnConditions(Biome biome, float temperature, float rainfall)
+    public int getSpawnWeight(Biome biome, float temperature, float rainfall)
     {
-        return temperature > -20 && temperature < 20 && rainfall > 75;
+        return 100;
+    }
+
+    @Override
+    public BiConsumer<List<EntityLiving>, Random> getGroupingRules()
+    {
+        return AnimalGroupingRules.ELDER_AND_POPULATION;
+    }
+
+    @Override
+    public int getMinGroupSize()
+    {
+        return 2;
+    }
+
+    @Override
+    public int getMaxGroupSize()
+    {
+        return 5;
     }
 
     public boolean isTame()
@@ -331,39 +347,6 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
         return false;
     }
 
-    @SuppressWarnings("deprecation")
-    public void fall(float distance, float damageMultiplier)
-    {
-        if (distance > 1.0F)
-        {
-            this.playSound(SoundEvents.ENTITY_HORSE_LAND, 0.4F, 1.0F);
-        }
-
-        int i = MathHelper.ceil((distance * 0.5F - 3.0F) * damageMultiplier);
-
-        if (i > 0)
-        {
-            this.attackEntityFrom(DamageSource.FALL, (float) i);
-
-            if (this.isBeingRidden())
-            {
-                for (Entity entity : this.getRecursivePassengers())
-                {
-                    entity.attackEntityFrom(DamageSource.FALL, (float) i);
-                }
-            }
-
-            IBlockState iblockstate = this.world.getBlockState(new BlockPos(this.posX, this.posY - 0.2D - (double) this.prevRotationYaw, this.posZ));
-            Block block = iblockstate.getBlock();
-
-            if (iblockstate.getMaterial() != Material.AIR && !this.isSilent())
-            {
-                SoundType soundtype = block.getSoundType();
-                this.world.playSound(null, this.posX, this.posY, this.posZ, soundtype.getStepSound(), this.getSoundCategory(), soundtype.getVolume() * 0.5F, soundtype.getPitch() * 0.75F);
-            }
-        }
-    }
-
     protected float getSoundVolume()
     {
         return 0.8F;
@@ -406,7 +389,7 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
 
                 if (this.isPotionActive(MobEffects.JUMP_BOOST))
                 {
-                    this.motionY += (double) ((float) (this.getActivePotionEffect(MobEffects.JUMP_BOOST).getAmplifier() + 1) * 0.1F);
+                    this.motionY += (float) (this.getActivePotionEffect(MobEffects.JUMP_BOOST).getAmplifier() + 1) * 0.1F;
                 }
 
                 this.setHorseJumping(true);
@@ -416,8 +399,8 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
                 {
                     float f = MathHelper.sin(this.rotationYaw * 0.017453292F);
                     float f1 = MathHelper.cos(this.rotationYaw * 0.017453292F);
-                    this.motionX += (double) (-0.4F * f * this.jumpPower);
-                    this.motionZ += (double) (0.4F * f1 * this.jumpPower);
+                    this.motionX += -0.4F * f * this.jumpPower;
+                    this.motionZ += 0.4F * f1 * this.jumpPower;
                     this.playSound(SoundEvents.ENTITY_HORSE_JUMP, 0.4F, 1.0F);
                 }
 
@@ -519,7 +502,7 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
         }
     }
 
-    public void writeEntityToNBT(NBTTagCompound compound)
+    public void writeEntityToNBT(@Nonnull NBTTagCompound compound)
     {
         super.writeEntityToNBT(compound);
         compound.setBoolean("EatingHaystack", this.isEatingHaystack());
@@ -538,7 +521,7 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
         }
     }
 
-    public void readEntityFromNBT(NBTTagCompound compound)
+    public void readEntityFromNBT(@Nonnull NBTTagCompound compound)
     {
         super.readEntityFromNBT(compound);
         this.setEatingHaystack(compound.getBoolean("EatingHaystack"));
@@ -636,7 +619,7 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
     }
 
     @Nullable
-    public EntityAgeable createChild(EntityAgeable ageable)
+    public EntityAgeable createChild(@Nonnull EntityAgeable ageable)
     {
         return null;
     }
@@ -644,7 +627,7 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
     protected void entityInit()
     {
         super.entityInit();
-        this.dataManager.register(STATUS, Byte.valueOf((byte) 0));
+        this.dataManager.register(STATUS, (byte) 0);
         this.dataManager.register(OWNER_UNIQUE_ID, Optional.absent());
     }
 
@@ -653,20 +636,43 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
         this.setScale(child ? this.getHorseSize() : 1.0F);
     }
 
-    @Override
-    public float getPercentToAdulthood()
+    @SuppressWarnings("deprecation")
+    public void fall(float distance, float damageMultiplier)
     {
-        if (this.getAge() != Age.CHILD) return 1;
-        double value = (CalendarTFC.PLAYER_TIME.getTotalDays() - this.getBirthDay()) / (double) DAYS_TO_ADULTHOOD;
-        if (value > 1f) value = 1f;
-        if (value < 0f) value = 0;
-        return (float) value;
+        if (distance > 1.0F)
+        {
+            this.playSound(SoundEvents.ENTITY_HORSE_LAND, 0.4F, 1.0F);
+        }
+
+        int i = MathHelper.ceil((distance * 0.5F - 3.0F) * damageMultiplier);
+
+        if (i > 0)
+        {
+            this.attackEntityFrom(DamageSource.FALL, (float) i);
+
+            if (this.isBeingRidden())
+            {
+                for (Entity entity : this.getRecursivePassengers())
+                {
+                    entity.attackEntityFrom(DamageSource.FALL, (float) i);
+                }
+            }
+
+            IBlockState iblockstate = this.world.getBlockState(new BlockPos(this.posX, this.posY - 0.2D - (double) this.prevRotationYaw, this.posZ));
+            Block block = iblockstate.getBlock();
+
+            if (iblockstate.getMaterial() != Material.AIR && !this.isSilent())
+            {
+                SoundType soundtype = block.getSoundType();
+                this.world.playSound(null, this.posX, this.posY, this.posZ, soundtype.getStepSound(), this.getSoundCategory(), soundtype.getVolume() * 0.5F, soundtype.getPitch() * 0.75F);
+            }
+        }
     }
 
     @Override
-    public Age getAge()
+    public int getDaysToAdulthood()
     {
-        return CalendarTFC.PLAYER_TIME.getTotalDays() >= this.getBirthDay() + DAYS_TO_ADULTHOOD ? Age.ADULT : Age.CHILD;
+        return DAYS_TO_ADULTHOOD;
     }
 
     @SideOnly(Side.CLIENT)
@@ -948,7 +954,7 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
 
     protected boolean getHorseWatchableBoolean(int p_110233_1_)
     {
-        return (this.dataManager.get(STATUS).byteValue() & p_110233_1_) != 0;
+        return (this.dataManager.get(STATUS) & p_110233_1_) != 0;
     }
 
     protected void onLeashDistance(float p_142017_1_)
@@ -1101,15 +1107,15 @@ public class AbstractHorseTFC extends EntityAnimalMammal implements IInventoryCh
 
     protected void setHorseWatchableBoolean(int p_110208_1_, boolean p_110208_2_)
     {
-        byte b0 = this.dataManager.get(STATUS).byteValue();
+        byte b0 = this.dataManager.get(STATUS);
 
         if (p_110208_2_)
         {
-            this.dataManager.set(STATUS, Byte.valueOf((byte) (b0 | p_110208_1_)));
+            this.dataManager.set(STATUS, (byte) (b0 | p_110208_1_));
         }
         else
         {
-            this.dataManager.set(STATUS, Byte.valueOf((byte) (b0 & ~p_110208_1_)));
+            this.dataManager.set(STATUS, (byte) (b0 & ~p_110208_1_));
         }
     }
 

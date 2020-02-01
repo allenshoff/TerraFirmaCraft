@@ -23,7 +23,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import net.dries007.tfc.objects.items.metal.ItemMetalChisel;
 
-import static net.dries007.tfc.api.util.TFCConstants.MOD_ID;
+import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 
 @SideOnly(Side.CLIENT)
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = MOD_ID)
@@ -39,29 +39,33 @@ public class ChiselHighlightHandler
             RayTraceResult traceResult = event.getTarget();
             BlockPos pos = traceResult.getBlockPos();
 
-            // Get the state that the chisel would turn the block into if it clicked
-            IBlockState newState = ItemMetalChisel.getChiselResultState(player, player.world, pos, traceResult.sideHit, (float) traceResult.hitVec.x - pos.getX(), (float) traceResult.hitVec.y - pos.getY(), (float) traceResult.hitVec.z - pos.getZ());
-            if (newState != null)
+            // pos is null if the raytraceresult is for an entity. This causes a crash. The IDE lies.
+            if (pos != null)
             {
-                AxisAlignedBB box = getBox(player, pos, event.getPartialTicks()).grow(0.001);
-                double offsetX = 0, offsetY = 0, offsetZ = 0;
-
-                if (newState.getBlock() instanceof BlockStairs)
+                // Get the state that the chisel would turn the block into if it clicked
+                IBlockState newState = ItemMetalChisel.getChiselResultState(player, player.world, pos, traceResult.sideHit, (float) traceResult.hitVec.x - pos.getX(), (float) traceResult.hitVec.y - pos.getY(), (float) traceResult.hitVec.z - pos.getZ());
+                if (newState != null)
                 {
-                    EnumFacing facing = newState.getValue(BlockStairs.FACING);
+                    AxisAlignedBB box = getBox(player, pos, event.getPartialTicks()).grow(0.001);
+                    double offsetX = 0, offsetY = 0, offsetZ = 0;
 
-                    offsetY = (newState.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP) ? -0.5 : 0.5;
-                    offsetX = -facing.getXOffset() * 0.5;
-                    offsetZ = -facing.getZOffset() * 0.5;
+                    if (newState.getBlock() instanceof BlockStairs)
+                    {
+                        EnumFacing facing = newState.getValue(BlockStairs.FACING);
+
+                        offsetY = (newState.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP) ? -0.5 : 0.5;
+                        offsetX = -facing.getXOffset() * 0.5;
+                        offsetZ = -facing.getZOffset() * 0.5;
+                    }
+                    else if (newState.getBlock() instanceof BlockSlab)
+                    {
+                        offsetY = (newState.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP) ? -0.5 : 0.5;
+                    }
+
+                    box = box.intersect(box.offset(offsetX, offsetY, offsetZ));
+
+                    drawBox(box);
                 }
-                else if (newState.getBlock() instanceof BlockSlab)
-                {
-                    offsetY = (newState.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP) ? -0.5 : 0.5;
-                }
-
-                box = box.intersect(box.offset(offsetX, offsetY, offsetZ));
-
-                drawBox(box);
             }
         }
     }

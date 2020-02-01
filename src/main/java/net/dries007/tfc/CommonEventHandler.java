@@ -9,12 +9,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.*;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.init.PotionTypes;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemFood;
@@ -70,6 +73,7 @@ import net.dries007.tfc.api.capability.size.CapabilityItemSize;
 import net.dries007.tfc.api.capability.size.IItemSize;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
+import net.dries007.tfc.api.types.ICreatureTFC;
 import net.dries007.tfc.api.types.Metal;
 import net.dries007.tfc.api.types.Rock;
 import net.dries007.tfc.network.PacketCalendarUpdate;
@@ -82,7 +86,7 @@ import net.dries007.tfc.objects.blocks.stone.BlockRockRaw;
 import net.dries007.tfc.objects.blocks.stone.BlockRockVariant;
 import net.dries007.tfc.objects.blocks.stone.BlockStoneAnvil;
 import net.dries007.tfc.objects.container.CapabilityContainerListener;
-import net.dries007.tfc.objects.entity.animal.IAnimalTFC;
+import net.dries007.tfc.objects.potioneffects.PotionEffectsTFC;
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.calendar.CalendarTFC;
 import net.dries007.tfc.util.calendar.CalendarWorldData;
@@ -90,7 +94,7 @@ import net.dries007.tfc.util.climate.ClimateTFC;
 import net.dries007.tfc.util.skills.SmithingSkill;
 import net.dries007.tfc.world.classic.chunkdata.ChunkDataTFC;
 
-import static net.dries007.tfc.api.util.TFCConstants.MOD_ID;
+import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 
 @SuppressWarnings("unused")
 @Mod.EventBusSubscriber(modid = MOD_ID)
@@ -117,16 +121,31 @@ public final class CommonEventHandler
     }
 
     /**
-     * Make leaves drop sticks
+     * Update harvesting tool before it takes damage
      */
+    @SubscribeEvent
+    public static void breakEvent(BlockEvent.BreakEvent event)
+    {
+        final EntityPlayer player = event.getPlayer();
+        if (player != null)
+        {
+            IPlayerData cap = player.getCapability(CapabilityPlayerData.CAPABILITY, null);
+            if (cap != null)
+            {
+                cap.setHarvestingTool(player.getHeldItemMainhand());
+            }
+        }
+    }
+
     @SubscribeEvent
     public static void onBlockHarvestDrops(BlockEvent.HarvestDropsEvent event)
     {
-        final EntityPlayer harvester = event.getHarvester();
-        final ItemStack heldItem = harvester == null ? ItemStack.EMPTY : harvester.getHeldItemMainhand();
+        final EntityPlayer player = event.getHarvester();
+        final ItemStack heldItem = player == null ? ItemStack.EMPTY : player.getHeldItemMainhand();
         final IBlockState state = event.getState();
         final Block block = state.getBlock();
 
+        // Make leaves drop sticks
         if (!event.isSilkTouching() && block instanceof BlockLeaves)
         {
             // Done via event so it applies to all leaves.
@@ -138,6 +157,26 @@ public final class CommonEventHandler
             if (Constants.RNG.nextFloat() < chance)
             {
                 event.getDrops().add(new ItemStack(Items.STICK));
+            }
+        }
+
+        // Apply durability modifier on tools
+        if (player != null)
+        {
+            ItemStack tool = ItemStack.EMPTY;
+            IPlayerData cap = player.getCapability(CapabilityPlayerData.CAPABILITY, null);
+            if (cap != null)
+            {
+                tool = cap.getHarvestingTool();
+            }
+            if (!tool.isEmpty())
+            {
+                float skillModifier = SmithingSkill.getSkillBonus(tool, SmithingSkill.Type.TOOLS) / 2.0F;
+                if (skillModifier > 0 && Constants.RNG.nextFloat() < skillModifier)
+                {
+                    // Up to 50% negating damage, for double durability
+                    player.setHeldItem(EnumHand.MAIN_HAND, tool);
+                }
             }
         }
     }
@@ -234,6 +273,19 @@ public final class CommonEventHandler
     public static void onLivingHurt(LivingHurtEvent event)
     {
         float actualDamage = event.getAmount();
+        // Add damage bonus for weapons
+        Entity entity = event.getSource().getTrueSource();
+        if (entity instanceof EntityLivingBase)
+        {
+            EntityLivingBase damager = (EntityLivingBase) entity;
+            ItemStack stack = damager.getHeldItemMainhand();
+            float skillModifier = SmithingSkill.getSkillBonus(stack, SmithingSkill.Type.WEAPONS);
+            if (skillModifier > 0)
+            {
+                // Up to 1.5x damage
+                actualDamage *= 1 + (skillModifier / 2.0F);
+            }
+        }
         // Modifier for damage type + damage resistance
         actualDamage *= DamageType.getModifier(event.getSource(), event.getEntityLiving());
         if (event.getEntityLiving() instanceof EntityPlayer)
@@ -270,12 +322,12 @@ public final class CommonEventHandler
                 event.addCapability(CapabilityItemSize.KEY, sizeHandler);
                 if (sizeHandler instanceof IItemSize)
                 {
-                    // Only modify the stack size if we're shrinking the size (i.e. don't make unstackable items stackable
+                    // Only modify the stack size if the item was stackable in the first place
+                    // Note: this is called in many cases BEFORE all custom capabilities are added.
                     int prevStackSize = stack.getMaxStackSize();
-                    int replacedStackSize = ((IItemSize) sizeHandler).getStackSize(stack);
-                    if (prevStackSize > replacedStackSize)
+                    if (prevStackSize != 1)
                     {
-                        item.setMaxStackSize(replacedStackSize);
+                        item.setMaxStackSize(((IItemSize) sizeHandler).getStackSize(stack));
                     }
                 }
             }
@@ -477,10 +529,10 @@ public final class CommonEventHandler
     @SubscribeEvent
     public static void onLivingSpawnEvent(LivingSpawnEvent.CheckSpawn event)
     {
-        // Check creature spawning
-        if (event.getEntity() instanceof IAnimalTFC)
+        // Check creature spawning - Prevents vanilla's respawning mechanic to spawn creatures outside their allowed conditions
+        if (event.getEntity() instanceof ICreatureTFC)
         {
-            IAnimalTFC animal = (IAnimalTFC) event.getEntity();
+            ICreatureTFC creature = (ICreatureTFC) event.getEntity();
             World world = event.getWorld();
             BlockPos pos = new BlockPos(event.getX(), event.getY(), event.getZ());
 
@@ -488,10 +540,8 @@ public final class CommonEventHandler
             float temperature = ClimateTFC.getAvgTemp(world, pos);
             Biome biome = world.getBiome(pos);
 
-            // Set entity pos before checking for collisions
-            event.getEntity().setPosition(event.getX(), event.getY(), event.getZ());
-
-            if (!animal.isValidSpawnConditions(biome, temperature, rainfall) || !((EntityLiving) event.getEntityLiving()).getCanSpawnHere())
+            // We don't roll spawning again since vanilla is handling it
+            if (creature.getSpawnWeight(biome, temperature, rainfall) <= 0)
             {
                 event.setResult(Event.Result.DENY);
             }
@@ -605,9 +655,7 @@ public final class CommonEventHandler
             if (hugeHeavyCount >= 2)
             {
                 // Player is barely able to move
-                event.player.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 25, 125, false, false));
-                event.player.addPotionEffect(new PotionEffect(MobEffects.MINING_FATIGUE, 25, 2, false, false));
-                event.player.addPotionEffect(new PotionEffect(MobEffects.JUMP_BOOST, 25, -125, false, false));
+                event.player.addPotionEffect(new PotionEffect(PotionEffectsTFC.OVERBURDENED, 25, 125, false, false));
             }
         }
     }
