@@ -12,7 +12,7 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import static net.dries007.tfc.api.util.TFCConstants.MOD_ID;
+import static net.dries007.tfc.TerraFirmaCraft.MOD_ID;
 
 /**
  * Top level items must be static, the subclasses' fields must not be static.
@@ -50,6 +50,10 @@ public class ConfigTFC
         @Config.Comment("Various debug options. Activates some extra wand features. Enables extra item tooltips.")
         @Config.LangKey("config." + MOD_ID + ".general.debug")
         public boolean debug = Launch.blackboard.get("fml.deobfuscatedEnvironment") != null;
+
+        @Config.Comment("If true, TFC will try and force the `level-type` setting to `tfc_classic` during DedicatedServer startup.")
+        @Config.LangKey("config." + MOD_ID + ".general.forceTFCWorldTypeOnServer")
+        public boolean forceTFCWorldTypeOnServer = true;
 
         @Config.Comment("Enable/Disable the vanilla recipe removal spam. False = Those recipes are left in place.")
         @Config.LangKey("config." + MOD_ID + ".general.removeVanillaRecipes")
@@ -307,6 +311,20 @@ public class ConfigTFC
         @Config.Comment("The default length of a month (in days) when a new world is started. This can be changed in existing worlds via the /timetfc command.")
         @Config.LangKey("config." + MOD_ID + ".general.defaultMonthLength")
         public int defaultMonthLength = 8;
+
+        @Config.Comment("Should animals became old and die?")
+        @Config.LangKey("config." + MOD_ID + ".general.enableAnimalAging")
+        public boolean enableAnimalAging = true;
+
+        @Config.Comment("How long until animals became old (in factor to adulthood)?")
+        @Config.RangeDouble(min = 1, max = 50)
+        @Config.LangKey("config." + MOD_ID + ".general.factorAnimalAging")
+        public double factorAnimalAging = 3;
+
+        @Config.Comment("Chance of animal dying (checked every in-game day) after it became old")
+        @Config.RangeDouble(min = 0, max = 1)
+        @Config.LangKey("config." + MOD_ID + ".general.chanceAnimalDeath")
+        public double chanceAnimalDeath = 0.0;
     }
 
     public static class ClientCFG

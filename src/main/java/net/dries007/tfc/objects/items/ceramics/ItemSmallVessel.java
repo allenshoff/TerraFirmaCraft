@@ -34,6 +34,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
+import net.dries007.tfc.TerraFirmaCraft;
 import net.dries007.tfc.api.capability.ISmallVesselHandler;
 import net.dries007.tfc.api.capability.food.CapabilityFood;
 import net.dries007.tfc.api.capability.food.FoodTrait;
@@ -44,7 +45,6 @@ import net.dries007.tfc.api.capability.size.IItemSize;
 import net.dries007.tfc.api.capability.size.Size;
 import net.dries007.tfc.api.capability.size.Weight;
 import net.dries007.tfc.api.types.Metal;
-import net.dries007.tfc.api.util.TFCConstants;
 import net.dries007.tfc.client.TFCGuiHandler;
 import net.dries007.tfc.objects.fluids.FluidsTFC;
 import net.dries007.tfc.util.Alloy;
@@ -125,6 +125,12 @@ public class ItemSmallVessel extends ItemPottery
         return false;
     }
 
+    /**
+     * Get the firing result of a vessel in a heating device
+     *
+     * @param input the small vessel
+     * @return the vessel with molten contents, if possible
+     */
     @Nonnull
     public ItemStack getFiringResult(ItemStack input)
     {
@@ -136,7 +142,7 @@ public class ItemSmallVessel extends ItemPottery
 
             for (int i = 0; i < cap.getSlots(); i++)
             {
-                alloy.add(cap.getStackInSlot(i));
+                alloy.add(cap.getStackInSlot(i), Metal.Tier.TIER_VI, 1600f);
                 cap.setStackInSlot(i, ItemStack.EMPTY);
             }
 
@@ -256,14 +262,14 @@ public class ItemSmallVessel extends ItemPottery
                 {
                     if (!slot.isEmpty())
                     {
-                        text.add(1, I18n.format(TFCConstants.MOD_ID + ".tooltip.small_vessel_item", slot.getCount(), slot.getItem().getItemStackDisplayName(slot)));
+                        text.add(1, I18n.format(TerraFirmaCraft.MOD_ID + ".tooltip.small_vessel_item", slot.getCount(), slot.getItem().getItemStackDisplayName(slot)));
                         hasContent = true;
                     }
                 }
 
                 if (!hasContent)
                 {
-                    text.add(1, I18n.format(TFCConstants.MOD_ID + ".tooltip.small_vessel_empty"));
+                    text.add(1, I18n.format(TerraFirmaCraft.MOD_ID + ".tooltip.small_vessel_empty"));
                 }
             }
             ISmallVesselHandler.super.addHeatInfo(stack, text);
